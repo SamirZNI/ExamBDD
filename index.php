@@ -1,47 +1,12 @@
-<?php
-require 'connexion.php';
-/* Ajouter une tâche */
-if($_SERVER["REQUEST_METHOD"] === "POST") { /* Vérifie si le formulaire a été soumis */
-    $titre = $_POST['titre']; /* Récupère les données du formulaire */
-    $description = $_POST['description'];
-    $statut = $_POST['statut'];
-    $priorite = $_POST['priorite'];
-    $date_limite = $_POST['date_limite'];
-    $date_creation = date('Y-m-d');
-    $sql = "INSERT INTO taches (titre, description, statut, priorite, date_limite, date_creation) VALUES (?, ?, ?, ?, ?, ?)"; /* Prépare la requête SQL pour insérer une nouvelle tâche */
-    $stmt = $pdo->prepare($sql); /* Prépare la requête pour éviter les injections SQL */
-    $stmt->execute([$titre, $description, $statut, $priorite, $date_limite, $date_creation]); /* Exécute la requête avec les données du formulaire */
-}
+<?php require 'config/conf.php'; ?>
+<!-- Ce fichier est la page principale de l'application de gestion de tâches. Il inclut le fichier de configuration "conf.php" qui contient la logique pour gérer les tâches (ajout, suppression, affichage). La page affiche un formulaire pour ajouter une nouvelle tâche, ainsi qu'une liste des tâches existantes avec des options pour filtrer et supprimer les tâches. -->
+<link rel="stylesheet" href="css/style.css">
+<script src="js/script.js"></script>
 
-$taches = $pdo->query("SELECT * FROM taches ORDER BY priorite DESC"); /* Récupérer les tâches triées par priorité */
-?>
-
-<script> /* Validation du formulaire */ 
-function verifierFormulaire() {
-    var titre = document.getElementById('titre').value; /* Récupère la valeur du champ titre */
-    if(titre === '') {
-        alert('Le titre est obligatoire');
-        return false;
-    }
-    return true;
-}
-/* Filtrer les tâches par statut */
-function filtrer(statut) {
-    var lignes = document.querySelectorAll('.tache');
-    lignes.forEach(function(ligne) { /* Parcourt chaque ligne de tâche et affiche ou masque en fonction du statut sélectionné */
-        if(statut === 'toutes' || ligne.dataset.statut === statut) { /* Affiche toutes les tâches ou celles qui correspondent au statut sélectionné */
-            ligne.style.display = ''; /* Affiche la ligne */
-        } else {
-            ligne.style.display = 'none'; /* Masque la ligne */
-        }
-    });
-}
-</script>
-<!-- Affiche  formulaire et la liste des tâches -->
-<h1>Gestion des tâches</h1>
+<h1>Tâches</h1>
 
 <h2>Ajouter une tâche</h2>
-<form method="post" onsubmit="return verifierFormulaire()">
+<form method="post" onsubmit="return verifierFormulaire()"> <!-- Affiche un formulaire pour ajouter une nouvelle tâche. Le formulaire utilise la méthode POST pour envoyer les données au serveur. La fonction JavaScript "verifierFormulaire" est appelée lors de la soumission du formulaire pour vérifier que le champ du titre n'est pas vide avant d'envoyer les données au serveur. -->
     Titre : <input type="text" name="titre" id="titre"><br>
     Description : <input type="text" name="description"><br>
     Statut :
@@ -59,27 +24,29 @@ function filtrer(statut) {
     Date limite : <input type="date" name="date_limite"><br>
     <button type="submit">Ajouter</button>
 </form>
-<!-- Affiche la liste des tâches avec des boutons pour filtrer par statut -->
+
 <h2>Liste des tâches</h2>
-<button onclick="filtrer('toutes')">Toutes</button>
+<button onclick="filtrer('toutes')">Toutes</button> <!-- Affiche un bouton pour filtrer les tâches affichées. Lorsque l'utilisateur clique sur ce bouton, la fonction JavaScript "filtrer" est appelée avec le paramètre "toutes", ce qui affiche toutes les tâches sans filtrage. -->
 <button onclick="filtrer('a_faire')">À faire</button>
 <button onclick="filtrer('termine')">Terminées</button>
 
 <table border="1">
-    <tr> <!-- Affiche les en-têtes du tableau pour les tâches --><
+    <tr>
         <th>Titre</th>
         <th>Description</th>
         <th>Statut</th>
         <th>Priorité</th>
         <th>Date limite</th>
-    </tr> 
-    <?php foreach($taches as $t): ?> <!-- Affiche chaque tâche dans un tableau -->
-    <tr class="tache" data-statut="<?= $t['statut'] ?>"> <!-- Ajoute une classe et un attribut pour le filtrage -->
-        <td><?= htmlspecialchars($t['titre']) ?></td> <!-- Utilise htmlspecialchars pour éviter les problèmes de sécurité liés à l'affichage de données utilisateur -->
-        <td><?= htmlspecialchars($t['description']) ?></td> <!-- Utilise htmlspecialchars pour éviter les problèmes de sécurité liés à l'affichage de données utilisateur -->
+        <th>Action</th>
+    </tr>
+    <?php foreach($taches as $t): ?>
+    <tr class="tache" data-statut="<?= $t['statut'] ?>"> <!-- Affiche une ligne pour chaque tâche dans le tableau. La classe "tache" est utilisée pour appliquer des styles CSS et la data-attribute "data-statut" est utilisée pour stocker le statut de la tâche, ce qui permet de filtrer les tâches en fonction de leur statut. -->
+        <td><?= htmlspecialchars($t['titre']) ?></td>
+        <td><?= htmlspecialchars($t['description']) ?></td>
         <td><?= $t['statut'] ?></td>
-        <td><?= $t['priorite'] ?></td>
-        <td><?= $t['date_limite'] ?></td>
+        <td><?= $t['priorite'] ?></td> <!-- Affiche les détails de chaque tâche dans une ligne du tableau. Les données sont échappées avec htmlspecialchars pour éviter les problèmes de sécurité liés à l'injection de code HTML. -->
+        <td><?= $t['date_limite'] ?></td> <!-- Affiche les détails de chaque tâche dans une ligne du tableau. Les données sont échappées avec htmlspecialchars pour éviter les problèmes de sécurité liés à l'injection de code HTML. -->
+        <td><a href="index.php?supprimer=<?= $t['id'] ?>">Supprimer</a></td> <!-- Affiche un lien de suppression pour chaque tâche. Lorsque l'utilisateur clique sur ce lien, il envoie une requête GET avec le paramètre "supprimer" contenant l'ID de la tâche à supprimer. Le code dans conf.php gère cette requête pour supprimer la tâche correspondante de la base de données. -->
     </tr>
     <?php endforeach; ?>
 </table>
