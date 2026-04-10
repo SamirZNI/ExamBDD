@@ -43,8 +43,8 @@ CREATE TABLE `taches` (
 
 INSERT INTO `taches` (`id`, `titre`, `description`, `statut`, `priorite`, `date_limite`, `date_creation`) VALUES
 (4, 'Faire la BDD', 'Créer les tables SQL', 'termine', 'haute', '2026-04-10', '2026-04-10'),
-(5, 'Faire le HTML', 'Créer les formulaires', 'en_cours', 'normale', '2026-04-15', '2026-04-10'),
-(6, 'Faire le CSS', 'Styliser les pages', 'a_faire', 'basse', '2026-04-20', '2026-04-10');
+(5, 'Faire le HTML', 'Formulaire à créer', 'en_cours', 'normale', '2026-04-15', '2026-04-10'),
+(6, 'Faire le CSS', 'Mettre du CSS, style la page', 'a_faire', 'basse', '2026-04-20', '2026-04-10');
 
 --
 -- Index pour les tables déchargées
